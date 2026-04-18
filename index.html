@@ -1,310 +1,339 @@
 <!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Monitoring Toko Kelontong</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-      
-        :root {
-            --tw-color-primary: #10b981;
-        }
-      
-        body {
-            font-family: 'Inter', system_ui, sans-serif;
-        }
-      
-        .nav-active {
-            background-color: #10b981;
-            color: white;
-            border-radius: 8px;
-        }
-      
-        .section {
-            display: none;
-        }
-      
-        .section.active {
-            display: block;
-        }
-      
-        .card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-      
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 20px 25px -5px rgb(16 185 129 / 0.1), 0 8px 10px -6px rgb(16 185 129 / 0.1);
-        }
-      
-        table {
-            border-collapse: collapse;
-        }
-      
-        th, td {
-            transition: background-color 0.2s;
-        }
-
-        /* Tambahan style untuk alarm banner */
-        #alarm-banner {
-            animation: alarmPulse 1s infinite alternate;
-        }
-        @keyframes alarmPulse {
-            from { transform: scale(1); }
-            to { transform: scale(1.05); }
-        }
-    </style>
-</head>
-<body class="bg-gray-50 text-gray-800">
-    <!-- HEADER, NAVIGASI, MAIN CONTENT, DAN FOOTER tetap sama seperti yang Anda berikan -->
-    <!-- (Saya tidak mengubah HTML agar sesuai proyek Anda) -->
-
-    <script>
-        // ====================== INISIALISASI TAILWIND (sudah ada) ======================
-        function initTailwind() {
-            return {
-                config(userConfig = {}) {
-                    return {
-                        configUser: userConfig,
-                        theme: {
-                            extend: {
-                                colors: {
-                                    primary: '#10b981'
-                                }
-                            }
-                        }
-                    }
-                },
-                theme: {
-                    extend: {}
-                }
-            }
-        }
-
-        // ====================== DATA DUMMY (sudah ada + ditambah data stok untuk monitoring) ======================
-        const dummyTransactions = [
-            { waktu: "19:42", no: "TRX-240404-047", barang: "Mie Indomie + Telur", total: "Rp 18.000", kasir: "Budi" },
-            { waktu: "19:35", no: "TRX-240404-046", barang: "Beras 5kg + Gula", total: "Rp 92.000", kasir: "Siti" },
-            { waktu: "19:28", no: "TRX-240404-045", barang: "Susu Dancow 400g", total: "Rp 25.000", kasir: "Budi" },
-            { waktu: "19:15", no: "TRX-240404-044", barang: "Minyak Goreng 2L", total: "Rp 48.000", kasir: "Siti" },
-            { waktu: "19:08", no: "TRX-240404-043", barang: "Sabun Colek + Shampoo", total: "Rp 35.000", kasir: "Budi" }
-        ];
-
-        // Data stok untuk validasi threshold alarm (monitoring sensor persediaan)
-        let stockData = [
-            { nama: "Telur Ayam (1 dus)", stok: 3, threshold: 5, emoji: "🥚" },
-            { nama: "Minyak Goreng 1L", stok: 7, threshold: 10, emoji: "🧴" },
-            { nama: "Beras 5kg", stok: 12, threshold: 5, emoji: "🍚" },
-            { nama: "Indomie Goreng", stok: 45, threshold: 20, emoji: "🍜" }
-        ];
-
-        // ====================== FUNGSI DOM MANIPULATION (Tujuan 1) ======================
-        function renderTable() {
-            const tbody = document.getElementById('table-body');
-            tbody.innerHTML = '';
-            
-            dummyTransactions.forEach(trx => {
-                const row = document.createElement('tr');
-                row.className = 'hover:bg-emerald-50 transition-colors';
-                row.innerHTML = `
-                    <td class="py-4 px-6 font-medium">${trx.waktu}</td>
-                    <td class="py-4 px-6 font-mono text-emerald-600">${trx.no}</td>
-                    <td class="py-4 px-6">${trx.barang}</td>
-                    <td class="py-4 px-6 text-right font-semibold">${trx.total}</td>
-                    <td class="py-4 px-6">${trx.kasir}</td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        // Update waktu real-time (DOM manipulation + interval)
-        function updateLiveTime() {
-            const liveTimeEl = document.getElementById('live-time');
-            setInterval(() => {
-                const now = new Date();
-                liveTimeEl.textContent = now.toLocaleTimeString('id-ID', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit'
-                });
-            }, 1000);
-        }
-
-        // Update waktu terakhir update
-        function updateLastUpdate() {
-            const lastUpdateEl = document.getElementById('last-update');
-            const now = new Date();
-            lastUpdateEl.textContent = now.toLocaleTimeString('id-ID', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-            });
-        }
-
-        // ====================== FUNGSI EVENT HANDLING (Tujuan 2) ======================
-        function showSection(section) {
-            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
-            const target = document.getElementById(section);
-            if (target) target.classList.add('active');
-
-            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('nav-active'));
-            const activeNav = document.getElementById('nav-' + section);
-            if (activeNav) activeNav.classList.add('nav-active');
-        }
-
-        // Event handler untuk klik item status persediaan (interaktif)
-        function addInteractiveEvents() {
-            const statusItems = document.querySelectorAll('#beranda .flex.justify-between.items-center');
-            statusItems.forEach(item => {
-                item.style.cursor = 'pointer';
-                item.addEventListener('click', function () {
-                    const statusSpan = this.querySelector('span');
-                    if (statusSpan && (statusSpan.textContent.includes('habis') || statusSpan.textContent.includes('Menipis'))) {
-                        // Manipulasi DOM secara langsung
-                        statusSpan.classList.remove('bg-red-100', 'text-red-600', 'bg-amber-100', 'text-amber-600');
-                        statusSpan.classList.add('bg-emerald-100', 'text-emerald-600');
-                        statusSpan.textContent = '✅ Di-restock';
-                        
-                        // Contoh validasi threshold setelah interaksi
-                        alert('✅ Stok berhasil di-update! Threshold alarm berhasil di-clear untuk item ini.');
-                    }
-                });
-            });
-        }
-
-        // ====================== VALIDASI THRESHOLD ALARM MONITORING (Tujuan 3) ======================
-        function checkThresholdAlarm() {
-            let alarmMessages = [];
-            
-            stockData.forEach(item => {
-                if (item.stok < item.threshold) {
-                    alarmMessages.push(`${item.emoji} ${item.nama} → Stok ${item.stok} < Threshold ${item.threshold}`);
-                }
-            });
-
-            if (alarmMessages.length > 0) {
-                showAlarmNotification(alarmMessages.join('\n'));
-            }
-        }
-
-        // Menampilkan alarm banner (DOM creation + event handling)
-        function showAlarmNotification(messages) {
-            let banner = document.getElementById('alarm-banner');
-            
-            if (!banner) {
-                // DOM Manipulation: Buat elemen alarm secara dinamis
-                banner = document.createElement('div');
-                banner.id = 'alarm-banner';
-                banner.className = 'fixed top-6 right-6 bg-red-600 text-white px-6 py-4 rounded-3xl shadow-2xl flex items-start gap-4 z-[9999] max-w-xs';
-                banner.innerHTML = `
-                    <div class="flex-1">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="text-3xl">🚨</span>
-                            <p class="font-semibold text-lg">ALARM THRESHOLD MONITORING!</p>
-                        </div>
-                        <p id="alarm-text" class="text-sm leading-tight whitespace-pre-line"></p>
-                    </div>
-                    <button id="ack-alarm-btn" 
-                            class="mt-1 bg-white text-red-600 hover:bg-red-100 px-5 py-2 rounded-2xl font-medium text-sm transition-colors">
-                        ACKNOWLEDGE
-                    </button>
-                `;
-                document.body.appendChild(banner);
-
-                // Event Handling: Klik tombol ACKNOWLEDGE
-                document.getElementById('ack-alarm-btn').addEventListener('click', () => {
-                    banner.style.transition = 'all 0.3s ease';
-                    banner.style.opacity = '0';
-                    banner.style.transform = 'translateY(-20px)';
-                    setTimeout(() => banner.remove(), 300);
-                });
-            }
-
-            // Update teks alarm
-            document.getElementById('alarm-text').textContent = messages;
-            
-            // Optional: Bisa ditambahkan suara alarm (demo)
-            // const audio = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'); audio.play(); // uncomment jika ingin
-        }
-
-        // ====================== REFRESH DASHBOARD + INTEGRASI SEMUA FITUR (Tujuan 4) ======================
-        function refreshDashboard() {
-            // Simulasi data baru (seperti sensor monitoring real-time)
-            const newTransaction = {
-                waktu: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
-                no: `TRX-${Math.floor(100000 + Math.random() * 900000)}`,
-                barang: ["Indomie + Telur", "Beras + Gula", "Minyak 1L", "Susu Dancow"][Math.floor(Math.random() * 4)],
-                total: `Rp ${Math.floor(15000 + Math.random() * 120000)}`,
-                kasir: Math.random() > 0.5 ? "Budi" : "Siti"
-            };
-            dummyTransactions.unshift(newTransaction);
-            if (dummyTransactions.length > 6) dummyTransactions.pop();
-
-            // Update tabel via DOM
-            renderTable();
-
-            // Update total transaksi (DOM)
-            const totalTrxEl = document.getElementById('total-transaksi');
-            let total = parseInt(totalTrxEl.textContent) || 47;
-            total += Math.floor(Math.random() * 4) + 1;
-            totalTrxEl.textContent = total;
-
-            // Update ringkasan penjualan (DOM)
-            const salesAmountEl = document.querySelector('#beranda .text-5xl.font-bold');
-            if (salesAmountEl) {
-                let sales = parseInt(salesAmountEl.textContent.replace(/\D/g, '')) || 4875000;
-                sales += Math.floor(Math.random() * 450000) + 75000;
-                salesAmountEl.textContent = `Rp ${sales.toLocaleString('id-ID')}`;
-            }
-
-            // Update last-update
-            updateLastUpdate();
-
-            // Validasi threshold alarm monitoring stok (sensor persediaan)
-            // Simulasi perubahan stok secara acak (seperti data sensor)
-            stockData.forEach(item => {
-                if (Math.random() > 0.7) item.stok = Math.max(0, item.stok - Math.floor(Math.random() * 3));
-            });
-            checkThresholdAlarm();
-
-            // Feedback visual
-            console.log('%c✅ Dashboard refreshed + threshold alarm dicek!', 'color: #10b981; font-weight: bold');
-        }
-
-        // ====================== EXPORT CSV (bonus interaktivitas) ======================
-        function exportTable() {
-            let csvContent = "Waktu,No Transaksi,Barang,Total,Kasir\n";
-            dummyTransactions.forEach(trx => {
-                csvContent += `${trx.waktu},${trx.no},${trx.barang},${trx.total},${trx.kasir}\n`;
-            });
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `transaksi_${new Date().toISOString().slice(0,10)}.csv`;
-            link.click();
-        }
-
-        // ====================== INISIALISASI UTAMA (DOMContentLoaded) ======================
-        document.addEventListener('DOMContentLoaded', () => {
-            initTailwind();
-            renderTable();
-            updateLiveTime();
-            updateLastUpdate();
-            addInteractiveEvents();
-
-            // Auto refresh simulasi monitoring setiap 25 detik (real-time feel)
-            setInterval(() => {
-                if (Math.random() > 0.6) refreshDashboard();
-            }, 25000);
-
-            console.log('%c🎉 Dashboard Monitoring Toko Kelontong siap! Semua tujuan tugas terpenuhi:', 'color:#10b981;font-size:16px;font-weight:600');
-            console.log('1. DOM Manipulation ✅');
-            console.log('2. Event Handling ✅');
-            console.log('3. Threshold Alarm Validation ✅');
-            console.log('4. Integrasi JS responsif ke dashboard ✅');
-        });
-    </script>
-</body>
-</html>
+   <html lang="id">
+   <head>
+       <meta charset="UTF-8">
+       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+       <title>Dashboard Monitoring Toko Kelontong</title>
+       <script src="https://cdn.tailwindcss.com"></script>
+       <style>
+           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+         
+           :root {
+               --tw-color-primary: #10b981;
+           }
+         
+           body {
+               font-family: 'Inter', system_ui, sans-serif;
+           }
+         
+           .nav-active {
+               background-color: #10b981;
+               color: white;
+               border-radius: 8px;
+           }
+         
+           .section {
+               display: none;
+           }
+         
+           .section.active {
+               display: block;
+           }
+         
+           .card {
+               transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+           }
+         
+           .card:hover {
+               transform: translateY(-2px);
+               box-shadow: 0 20px 25px -5px rgb(16 185 129 / 0.1), 0 8px 10px -6px rgb(16 185 129 / 0.1);
+           }
+         
+           table {
+               border-collapse: collapse;
+           }
+         
+           th, td {
+               transition: background-color 0.2s;
+           }
+       </style>
+   </head>
+   <body class="bg-gray-50 text-gray-800">
+       <!-- HEADER -->
+       <header class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
+           <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+               <div class="flex items-center gap-3">
+                   <div class="w-9 h-9 bg-emerald-500 rounded-2xl flex items-center justify-center text-white text-2xl">🛒</div>
+                   <h1 class="text-2xl font-semibold text-emerald-600">Dashboard Monitoring</h1>
+                   <span class="text-emerald-600 font-medium">Toko Kelontong Sumber Rejeki</span>
+               </div>
+             
+               <!-- Info waktu real-time -->
+               <div class="flex items-center gap-6 text-sm">
+                   <div class="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-1 rounded-3xl">
+                       <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                       <span id="live-time" class="font-medium"></span>
+                   </div>
+                 
+                   <button
+                       onclick="refreshDashboard()"
+                       aria-label="Refresh semua data dashboard"
+                       class="flex items-center gap-2 bg-white hover:bg-emerald-50 border border-emerald-200 hover:border-emerald-300 text-emerald-700 px-5 py-2 rounded-2xl transition-colors font-medium">
+                       <span class="text-xl">⟳</span>
+                       <span>Refresh Data</span>
+                   </button>
+                 
+                   <div class="flex items-center gap-2">
+                       <div class="text-right">
+                           <p class="text-xs text-gray-500">Kasir Hari Ini</p>
+                           <p class="font-semibold text-emerald-600">Budi Santoso</p>
+                       </div>
+                       <div class="w-8 h-8 bg-emerald-100 rounded-2xl flex items-center justify-center text-xl">👨‍💼</div>
+                   </div>
+               </div>
+           </div>
+       </header>
+       <div class="flex max-w-7xl mx-auto">
+           <!-- NAVIGASI (Semantic <nav>) -->
+           <nav class="w-64 bg-white border-r border-gray-200 min-h-[calc(100vh-73px)] px-4 py-6 flex flex-col" aria-label="Menu utama dashboard">
+               <h2 class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-4 px-4">Menu Monitoring</h2>
+             
+               <button onclick="showSection('beranda')"
+                       id="nav-beranda"
+                       class="nav-item flex items-center gap-3 w-full text-left px-4 py-3 mb-1 text-gray-700 hover:bg-emerald-50 transition-colors nav-active">
+                   <span class="text-2xl">🏠</span>
+                   <span class="font-medium">Beranda</span>
+               </button>
+             
+               <button onclick="showSection('stok')"
+                       id="nav-stok"
+                       class="nav-item flex items-center gap-3 w-full text-left px-4 py-3 mb-1 text-gray-700 hover:bg-emerald-50 transition-colors">
+                   <span class="text-2xl">📦</span>
+                   <span class="font-medium">Stok Barang</span>
+               </button>
+             
+               <button onclick="showSection('penjualan')"
+                       id="nav-penjualan"
+                       class="nav-item flex items-center gap-3 w-full text-left px-4 py-3 mb-1 text-gray-700 hover:bg-emerald-50 transition-colors">
+                   <span class="text-2xl">💰</span>
+                   <span class="font-medium">Penjualan Harian</span>
+               </button>
+               <div class="mt-auto px-4 pt-8 border-t">
+                   <p class="text-xs text-gray-400 mb-2">Total Transaksi Hari Ini</p>
+                   <p id="total-transaksi" class="text-3xl font-semibold text-emerald-600">47</p>
+                   <p class="text-sm text-emerald-500">+12 dari kemarin</p>
+               </div>
+             
+               <div class="mt-6 px-4">
+                   <a href="#" onclick="alert('Fitur laporan akan ditampilkan di versi lengkap'); return false;"
+                      class="flex items-center justify-center gap-2 text-emerald-600 hover:text-emerald-700 text-sm font-medium">
+                       <span>Lihat Laporan Lengkap</span>
+                       <span>→</span>
+                   </a>
+               </div>
+           </nav>
+           <!-- MAIN CONTENT -->
+           <main class="flex-1 p-8">
+               <!-- SECTION BERANDA -->
+               <section id="beranda" class="section active">
+                   <!-- 2 ARTICLE DATA (Semantic) -->
+                   <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                     
+                       <!-- Article 1: Ringkasan Penjualan -->
+                       <article class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 card">
+                           <h2 class="text-emerald-600 text-lg font-semibold mb-1">Ringkasan Penjualan Hari Ini</h2>
+                           <div class="flex justify-between items-baseline mb-6">
+                               <span class="text-5xl font-bold text-gray-800">Rp 4.875.000</span>
+                               <span class="text-emerald-500 text-sm font-medium px-3 py-1 bg-emerald-100 rounded-3xl">↑ 18% dari kemarin</span>
+                           </div>
+                           <div class="flex justify-between text-sm">
+                               <div>
+                                   <p class="text-gray-500">Transaksi</p>
+                                   <p class="font-semibold text-2xl">47</p>
+                               </div>
+                               <div>
+                                   <p class="text-gray-500">Rata-rata per transaksi</p>
+                                   <p class="font-semibold text-2xl">Rp 103.723</p>
+                               </div>
+                               <div>
+                                   <p class="text-gray-500">Barang terjual</p>
+                                   <p class="font-semibold text-2xl">128 item</p>
+                               </div>
+                           </div>
+                       </article>
+                       <!-- Article 2: Status Persediaan -->
+                       <article class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 card">
+                           <h2 class="text-emerald-600 text-lg font-semibold mb-1">Status Persediaan Kritis</h2>
+                           <div class="space-y-4">
+                               <div class="flex justify-between items-center">
+                                   <div class="flex items-center gap-3">
+                                       <span class="text-2xl">🥚</span>
+                                       <div>
+                                           <p class="font-medium">Telur Ayam (1 dus)</p>
+                                           <p class="text-xs text-gray-500">Stok tersisa: 3 dus</p>
+                                       </div>
+                                   </div>
+                                   <span class="px-4 py-1 text-xs font-medium bg-red-100 text-red-600 rounded-3xl">Hampir habis</span>
+                               </div>
+                               <div class="flex justify-between items-center">
+                                   <div class="flex items-center gap-3">
+                                       <span class="text-2xl">🧴</span>
+                                       <div>
+                                           <p class="font-medium">Minyak Goreng 1L</p>
+                                           <p class="text-xs text-gray-500">Stok tersisa: 7 botol</p>
+                                       </div>
+                                   </div>
+                                   <span class="px-4 py-1 text-xs font-medium bg-amber-100 text-amber-600 rounded-3xl">Menipis</span>
+                               </div>
+                               <div class="flex justify-between items-center">
+                                   <div class="flex items-center gap-3">
+                                       <span class="text-2xl">🍚</span>
+                                       <div>
+                                           <p class="font-medium">Beras 5kg</p>
+                                           <p class="text-xs text-gray-500">Stok tersisa: 12 karung</p>
+                                       </div>
+                                   </div>
+                                   <span class="px-4 py-1 text-xs font-medium bg-emerald-100 text-emerald-600 rounded-3xl">Aman</span>
+                               </div>
+                           </div>
+                       </article>
+                   </div>
+                   <!-- TABEL DATA (Semantic) -->
+                   <section class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
+                       <div class="flex items-center justify-between mb-6">
+                           <h2 class="text-xl font-semibold">Transaksi Terbaru (Hari Ini)</h2>
+                           <button onclick="exportTable()"
+                                   aria-label="Ekspor tabel transaksi ke CSV"
+                                   class="text-xs flex items-center gap-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-2xl text-gray-600">
+                               📤 <span>Export CSV</span>
+                           </button>
+                       </div>
+                     
+                       <table class="w-full text-sm" aria-label="Tabel transaksi terbaru toko">
+                           <thead>
+                               <tr class="border-b border-gray-200 text-gray-500 text-left">
+                                   <th class="py-4 px-6 font-medium">Waktu</th>
+                                   <th class="py-4 px-6 font-medium">No. Transaksi</th>
+                                   <th class="py-4 px-6 font-medium">Barang</th>
+                                   <th class="py-4 px-6 font-medium text-right">Total</th>
+                                   <th class="py-4 px-6 font-medium">Kasir</th>
+                               </tr>
+                           </thead>
+                           <tbody id="table-body" class="divide-y divide-gray-100">
+                               <!-- Data diisi via JavaScript -->
+                           </tbody>
+                       </table>
+                   </section>
+               </section>
+               <!-- SECTION STOK BARANG -->
+               <section id="stok" class="section">
+                   <h2 class="text-2xl font-semibold mb-6 flex items-center gap-3">
+                       <span>📦</span> Monitoring Stok Barang
+                   </h2>
+                   <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                       <div class="bg-white p-6 rounded-3xl border border-gray-100">
+                           <p class="text-gray-400 text-sm">Total SKU</p>
+                           <p class="text-5xl font-bold text-emerald-600 mt-2">128</p>
+                       </div>
+                       <div class="bg-white p-6 rounded-3xl border border-gray-100">
+                           <p class="text-gray-400 text-sm">Barang Aman</p>
+                           <p class="text-5xl font-bold text-emerald-600 mt-2">112</p>
+                       </div>
+                       <div class="bg-white p-6 rounded-3xl border border-gray-100">
+                           <p class="text-gray-400 text-sm">Barang Kritis</p>
+                           <p class="text-5xl font-bold text-red-500 mt-2">16</p>
+                       </div>
+                   </div>
+                   <p class="mt-8 text-gray-500 text-center">Tabel stok lengkap tersedia di fitur lanjutan. Data di atas sudah real-time.</p>
+               </section>
+               <!-- SECTION PENJUALAN -->
+               <section id="penjualan" class="section">
+                   <h2 class="text-2xl font-semibold mb-6 flex items-center gap-3">
+                       <span>💰</span> Penjualan Harian
+                   </h2>
+                   <div class="bg-white rounded-3xl p-8 border border-gray-100">
+                       <div class="flex justify-between mb-8">
+                           <div>
+                               <p class="text-gray-400">Penjualan Minggu Ini</p>
+                               <p class="text-6xl font-bold text-emerald-600">Rp 28.450.000</p>
+                           </div>
+                           <div class="text-right">
+                               <p class="text-emerald-500 text-xl">+23% minggu lalu</p>
+                               <div class="text-xs mt-6 bg-emerald-100 text-emerald-700 inline-flex px-5 py-2 rounded-3xl">Target minggu ini: Rp 30.000.000</div>
+                           </div>
+                       </div>
+                       <p class="text-center text-gray-400">Grafik penjualan akan muncul di versi lengkap dengan Chart.js</p>
+                   </div>
+               </section>
+           </main>
+       </div>
+       <!-- FOOTER -->
+       <footer class="bg-white border-t border-gray-200 py-6 text-center text-xs text-gray-400">
+           <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
+               <p>© 2026 Toko Kelontong Sumber Rejeki • Balikpapan, Kalimantan Timur</p>
+               <p>Data terakhir di-update: <span id="last-update" class="font-medium text-emerald-600"></span></p>
+               <p class="flex items-center gap-2">
+                   <span class="inline-block w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></span>
+                   Sistem Online • 100% Real-time
+               </p>
+           </div>
+       </footer>
+       <script>
+           // Inisialisasi Tailwind
+           function initTailwind() {
+               return {
+                   config(userConfig = {}) {
+                       return {
+                           configUser: userConfig,
+                           theme: {
+                               extend: {
+                                   colors: {
+                                       primary: '#10b981'
+                                   }
+                               }
+                           }
+                       }
+                   },
+                   theme: {
+                       extend: {}
+                   }
+               }
+           }
+         
+           // Data dummy untuk tabel
+           const dummyTransactions = [
+               { waktu: "19:42", no: "TRX-240404-047", barang: "Mie Indomie + Telur", total: "Rp 18.000", kasir: "Budi" },
+               { waktu: "19:35", no: "TRX-240404-046", barang: "Beras 5kg + Gula", total: "Rp 92.000", kasir: "Siti" },
+               { waktu: "19:28", no: "TRX-240404-045", barang: "Susu Dancow 400g", total: "Rp 25.000", kasir: "Budi" },
+               { waktu: "19:15", no: "TRX-240404-044", barang: "Minyak Goreng 2L", total: "Rp 48.000", kasir: "Siti" },
+               { waktu: "19:08", no: "TRX-240404-043", barang: "Sabun Colek + Shampoo", total: "Rp 35.000", kasir: "Budi" }
+           ]
+           // Render tabel
+           function renderTable() {
+               const tbody = document.getElementById('table-body')
+               tbody.innerHTML = ''
+             
+               dummyTransactions.forEach(trx => {
+                   const row = document.createElement('tr')
+                   row.className = 'hover:bg-emerald-50 transition-colors'
+                   row.innerHTML = `
+                       <td class="py-4 px-6 font-medium">${trx.waktu}</td>
+                       <td class="py-4 px-6 font-mono text-emerald-600">${trx.no}</td>
+                       <td class="py-4 px-6">${trx.barang}</td>
+                       <td class="py-4 px-6 text-right font-semibold">${trx.total}</td>
+                       <td class="py-4 px-6">${trx.kasir}</td>
+                   `
+                   tbody.appendChild(row)
+               })
+           }
+           // Fungsi ganti section
+           function showSection(section) {
+               // Sembunyikan semua section
+               document.querySelectorAll('.section').forEach(sec => {
+                   sec.classList.remove('active')
+               })
+             
+               // Tampilkan section yang dipilih
+               const target = document.getElementById(section)
+               if (target) target.classList.add('active')
+             
+               // Reset semua nav button
+               document.querySelectorAll('.nav-item').forEach(btn => {
+                   btn.classList.remove('nav-active')
+               })
+             
+               // Aktifkan nav yang diklik
+               const activeNav = document.getElementById('nav-' + section)
+               if (activeNav) activeNav.classList.add('nav-active')
+           }
+           // Refresh dashboard
