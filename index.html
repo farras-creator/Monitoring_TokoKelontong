@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Monitoring Toko Kelontong</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="js/app.js" defer></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+  <main class="max-w-6xl mx-auto px-4 py-8">
+    <section class="bg-white rounded-2xl shadow p-6 mb-6">
+      <h1 class="text-3xl font-bold text-emerald-600">Dashboard Monitoring Toko Kelontong</h1>
+      <p class="text-gray-600 mt-2">
+        Monitoring sederhana kondisi stok dan operasional toko menggunakan data dari file JSON.
+      </p>
+
+      <div class="mt-4 flex flex-wrap gap-3 items-center">
+        <button id="btnLoad" class="px-5 py-2 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition">
+          Tampilkan Data Sensor
+        </button>
+        <span class="text-sm text-gray-500">Klik tombol untuk membaca file JSON.</span>
+      </div>
+    </section>
+
+    <section id="errorBox" class="hidden mb-6 p-4 rounded-xl bg-red-100 text-red-700 border border-red-200"></section>
+
+    <section class="bg-white rounded-2xl shadow p-6">
+      <div class="flex items-center justify-between gap-3 mb-5">
+        <h2 class="text-xl font-semibold">Data Monitoring</h2>
+        <p class="text-sm text-gray-500">Status ditentukan otomatis berdasarkan nilai dan ambang batas</p>
+      </div>
+
+      <div id="sensorContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="text-gray-500">Belum ada data yang ditampilkan.</div>
+      </div>
+    </section>
+  </main>
+
+</body>
+</html>
