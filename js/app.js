@@ -1,34 +1,29 @@
+// Penghubung ke elemen HTML pada index.html
 const btnLoad = document.getElementById("btnLoad");
 const sensorContainer = document.getElementById("sensorContainer");
 const errorBox = document.getElementById("errorBox");
 
+// Menampilkan pesan error pada halaman
 function showError(message) {
   errorBox.textContent = message;
   errorBox.classList.remove("hidden");
 }
 
+// Menghapus pesan error
 function clearError() {
   errorBox.textContent = "";
   errorBox.classList.add("hidden");
 }
 
+// Menentukan status berdasarkan isi JSON
 function getStatus(item) {
   if (item.kategori === "stok") {
     if (item.nilai <= item.ambang_bahaya) {
-      return {
-        label: "BAHAYA",
-        className: "status-bahaya"
-      };
+      return { label: "DARURAT", className: "status-darurat" };
     } else if (item.nilai <= item.ambang_waspada) {
-      return {
-        label: "WASPADA",
-        className: "status-waspada"
-      };
+      return { label: "WASPADA", className: "status-waspada" };
     } else {
-      return {
-        label: "AMAN",
-        className: "status-aman"
-      };
+      return { label: "AMAN", className: "status-aman" };
     }
   }
 
@@ -36,29 +31,18 @@ function getStatus(item) {
     const nilai = String(item.nilai).toUpperCase();
 
     if (nilai === "ONLINE" || nilai === "BUKA") {
-      return {
-        label: "AMAN",
-        className: "status-aman"
-      };
+      return { label: "AMAN", className: "status-aman" };
     } else if (nilai === "TERGANGGU") {
-      return {
-        label: "WASPADA",
-        className: "status-waspada"
-      };
+      return { label: "WASPADA", className: "status-waspada" };
     } else {
-      return {
-        label: "BAHAYA",
-        className: "status-bahaya"
-      };
+      return { label: "DARURAT", className: "status-darurat" };
     }
   }
 
-  return {
-    label: "TIDAK DIKENALI",
-    className: "status-waspada"
-  };
+  return { label: "TIDAK DIKENALI", className: "status-waspada" };
 }
 
+// Menampilkan data JSON dalam bentuk kartu
 function renderData(data) {
   sensorContainer.innerHTML = "";
 
@@ -86,33 +70,26 @@ function renderData(data) {
         </p>
       </div>
 
-      ${
-        item.kategori === "stok"
-          ? `
-        <div class="mt-4 text-sm text-gray-600">
-          <p>Ambang Waspada: <strong>${item.ambang_waspada} ${item.satuan}</strong></p>
-          <p>Ambang Bahaya: <strong>${item.ambang_bahaya} ${item.satuan}</strong></p>
-        </div>
-        `
-          : `
-        <div class="mt-4 text-sm text-gray-600">
-          <p>Status operasional toko ditentukan dari kondisi: <strong>${item.nilai}</strong></p>
-        </div>
-        `
-      }
+      <div class="mt-4 text-sm text-gray-600">
+        <p>Keterangan: <strong>${item.keterangan}</strong></p>
+        <p>Update terakhir: <strong>${item.last_update}</strong></p>
+      </div>
     `;
 
     sensorContainer.appendChild(card);
   });
 }
 
+// Fetch data dari file JSON dummy
 async function loadSensorData() {
   try {
     clearError();
 
-    const response = await fetch("data/sensor.json");
+    // Penghubung JavaScript ke file JSON
+    const response = await fetch("data/input.json");
+
     if (!response.ok) {
-      throw new Error("Gagal membaca file JSON.");
+      throw new Error("File JSON tidak ditemukan");
     }
 
     const data = await response.json();
@@ -123,4 +100,5 @@ async function loadSensorData() {
   }
 }
 
+// Event tombol pada index.html
 btnLoad.addEventListener("click", loadSensorData);
