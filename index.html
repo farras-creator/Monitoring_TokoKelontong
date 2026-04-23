@@ -1,43 +1,112 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>Dashboard Monitoring Toko Kelontong</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="css/style.css" />
-  <script src="js/app.js" defer></script>
+
+  <style>
+    body { font-family: sans-serif; }
+    .card:hover { transform: translateY(-3px); transition: 0.3s; }
+  </style>
 </head>
-<body class="bg-gray-100 text-gray-800">
 
-  <main class="max-w-6xl mx-auto px-4 py-8">
-    <section class="bg-white rounded-2xl shadow p-6 mb-6">
-      <h1 class="text-3xl font-bold text-emerald-600">Dashboard Monitoring Toko Kelontong</h1>
-      <p class="text-gray-600 mt-2">
-        Monitoring sederhana kondisi stok dan operasional toko menggunakan data dari file JSON.
+<body class="bg-gray-100 p-6">
+
+  <h1 class="text-3xl font-bold text-emerald-600 mb-4">
+    Dashboard Monitoring Toko Kelontong
+  </h1>
+
+  <button onclick="loadData()" 
+    class="bg-emerald-600 text-white px-5 py-2 rounded-lg mb-6">
+    Tampilkan Data Sensor
+  </button>
+
+  <div id="error" class="text-red-600 mb-4"></div>
+
+  <div id="container" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+
+  <!-- ALARM -->
+  <div id="alarm" class="hidden fixed top-5 right-5 bg-red-600 text-white p-4 rounded-xl shadow-xl"></div>
+
+<script>
+let dataSensor = [];
+
+// ================= FETCH JSON =================
+async function loadData() {
+  try {
+    document.getElementById("error").innerText = "";
+
+    const res = await fetch("data/sensor.json");
+
+    if (!res.ok) throw new Error("File JSON tidak ditemukan");
+
+    dataSensor = await res.json();
+
+    renderCards();
+    checkAlarm();
+
+  } catch (err) {
+    document.getElementById("error").innerText = err.message;
+  }
+}
+
+// ================= STATUS =================
+function getStatus(item) {
+  if (item.nilai <= item.ambang_bahaya) {
+    return { label: "BAHAYA", color: "bg-red-200 text-red-700" };
+  } else if (item.nilai <= item.ambang_waspada) {
+    return { label: "WASPADA", color: "bg-yellow-200 text-yellow-700" };
+  } else {
+    return { label: "AMAN", color: "bg-green-200 text-green-700" };
+  }
+}
+
+// ================= RENDER CARD =================
+function renderCards() {
+  const container = document.getElementById("container");
+  container.innerHTML = "";
+
+  dataSensor.forEach(item => {
+    const status = getStatus(item);
+
+    const card = document.createElement("div");
+    card.className = "card bg-white p-4 rounded-xl shadow";
+
+    card.innerHTML = `
+      <h2 class="text-xl font-bold">${item.emoji} ${item.nama}</h2>
+      <p class="text-2xl font-semibold mt-2">
+        ${item.nilai} ${item.satuan}
       </p>
+      <span class="px-3 py-1 rounded ${status.color}">
+        ${status.label}
+      </span>
+    `;
 
-      <div class="mt-4 flex flex-wrap gap-3 items-center">
-        <button id="btnLoad" class="px-5 py-2 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition">
-          Tampilkan Data Sensor
-        </button>
-        <span class="text-sm text-gray-500">Klik tombol untuk membaca file JSON.</span>
-      </div>
-    </section>
+    container.appendChild(card);
+  });
+}
 
-    <section id="errorBox" class="hidden mb-6 p-4 rounded-xl bg-red-100 text-red-700 border border-red-200"></section>
+// ================= ALARM =================
+function checkAlarm() {
+  let pesan = [];
 
-    <section class="bg-white rounded-2xl shadow p-6">
-      <div class="flex items-center justify-between gap-3 mb-5">
-        <h2 class="text-xl font-semibold">Data Monitoring</h2>
-        <p class="text-sm text-gray-500">Status ditentukan otomatis berdasarkan nilai dan ambang batas</p>
-      </div>
+  dataSensor.forEach(item => {
+    if (item.nilai <= item.ambang_bahaya) {
+      pesan.push(`${item.nama} KRITIS!`);
+    }
+  });
 
-      <div id="sensorContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div class="text-gray-500">Belum ada data yang ditampilkan.</div>
-      </div>
-    </section>
-  </main>
+  const alarm = document.getElementById("alarm");
+
+  if (pesan.length > 0) {
+    alarm.classList.remove("hidden");
+    alarm.innerText = "🚨 " + pesan.join("\n");
+  } else {
+    alarm.classList.add("hidden");
+  }
+}
+</script>
 
 </body>
 </html>

@@ -1,32 +1,26 @@
 [
   {
-    "nama": "Stok Beras 5kg",
-    "nilai": 12,
-    "satuan": "karung",
-    "kategori": "stok",
-    "ambang_waspada": 8,
-    "ambang_bahaya": 4
-  },
-  {
-    "nama": "Stok Minyak Goreng 1L",
-    "nilai": 6,
-    "satuan": "botol",
-    "kategori": "stok",
-    "ambang_waspada": 10,
-    "ambang_bahaya": 5
-  },
-  {
-    "nama": "Stok Telur Ayam",
+    "nama": "Telur Ayam",
     "nilai": 3,
     "satuan": "dus",
-    "kategori": "stok",
     "ambang_waspada": 5,
-    "ambang_bahaya": 2
+    "ambang_bahaya": 2,
+    "emoji": "🥚"
   },
   {
-    "nama": "Operasional Kasir",
-    "nilai": "ONLINE",
-    "satuan": "status",
-    "kategori": "operasional"
+    "nama": "Minyak Goreng 1L",
+    "nilai": 7,
+    "satuan": "botol",
+    "ambang_waspada": 10,
+    "ambang_bahaya": 5,
+    "emoji": "🧴"
+  },
+  {
+    "nama": "Beras 5kg",
+    "nilai": 12,
+    "satuan": "karung",
+    "ambang_waspada": 8,
+    "ambang_bahaya": 4,
+    "emoji": "🍚"
   }
 ]
