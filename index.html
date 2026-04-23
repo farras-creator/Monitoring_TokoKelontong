@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <title>Dashboard Monitoring Toko</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <title>Dashboard Monitoring Toko Kelontong</title>
 
   <!-- Penghubung ke Tailwind CSS dari CDN -->
@@ -15,42 +16,50 @@
   <script src="js/app.js" defer></script>
 </head>
 
-<body class="bg-gray-100 text-gray-800">
-  <main class="max-w-6xl mx-auto px-4 py-8">
-    <section class="bg-white rounded-2xl shadow p-6 mb-6">
-      <h1 class="text-3xl font-bold text-emerald-600">
-        Dashboard Monitoring Toko Kelontong
-      </h1>
-      <p class="text-gray-600 mt-2">
-        Monitoring stok dan operasional toko menggunakan data dummy dalam format JSON.
-      </p>
+  <style>
+    .card:hover {
+      transform: translateY(-5px);
+      transition: 0.3s;
+    }
 
-      <div class="mt-4 flex flex-wrap gap-3 items-center">
-        <button id="btnLoad" class="btn-primary">
-          Tampilkan Data Stok Barang
-        </button>
-        <span class="text-sm text-gray-500">
-          Klik tombol untuk membaca file JSON.
-        </span>
-      </div>
-    </section>
+    .pulse {
+      animation: pulse 1s infinite;
+    }
 
-    <!-- Tempat pesan error jika JSON gagal dibaca -->
-    <section id="errorBox" class="hidden mb-6 p-4 rounded-xl bg-red-100 text-red-700 border border-red-200"></section>
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.05); }
+    }
+  </style>
 
-    <section class="bg-white rounded-2xl shadow p-6">
-      <div class="flex items-center justify-between gap-3 mb-5">
-        <h2 class="text-xl font-semibold">Data Monitoring</h2>
-        <p class="text-sm text-gray-500">
-          Status berubah otomatis sesuai nilai dan ambang batas
-        </p>
-      </div>
+  <script src="js/app.js" defer></script>
+</head>
 
-      <!-- Tempat kartu data dari JSON -->
-      <div id="sensorContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div class="text-gray-500">Belum ada data yang ditampilkan.</div>
-      </div>
-    </section>
-  </main>
+<body class="bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen p-6">
+
+  <h1 class="text-4xl font-bold text-emerald-600 mb-6">
+    🏪 Dashboard Toko Kelontong
+  </h1>
+
+  <!-- CONTROL -->
+  <div class="flex gap-3 mb-6 flex-wrap">
+    <button onclick="loadSensorData()" class="bg-emerald-600 text-white px-4 py-2 rounded-lg">
+      Load Data
+    </button>
+
+    <button onclick="filterData('all')" class="bg-gray-200 px-4 py-2 rounded-lg">Semua</button>
+    <button onclick="filterData('stok')" class="bg-gray-200 px-4 py-2 rounded-lg">Stok</button>
+    <button onclick="filterData('operasional')" class="bg-gray-200 px-4 py-2 rounded-lg">Operasional</button>
+  </div>
+
+  <!-- SUMMARY -->
+  <div id="summary" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
+
+  <!-- ERROR -->
+  <div id="errorBox" class="text-red-600 mb-4"></div>
+
+  <!-- DATA -->
+  <div id="container" class="grid md:grid-cols-3 gap-4"></div>
+
 </body>
 </html>

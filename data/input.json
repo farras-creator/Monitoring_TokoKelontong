@@ -2,10 +2,10 @@
   {
     "id": 1,
     "nama": "Stok Telur Ayam",
-    "nilai": 3,
+    "jumlah": 3,
     "satuan": "dus",
     "ambang_waspada": 5,
-    "ambang_bahaya": 2,
+    "ambang_darurat": 2,
     "kategori": "stok",
     "keterangan": "Stok hampir habis",
     "last_update": "2026-04-23 10:00:00"
@@ -13,10 +13,10 @@
   {
     "id": 2,
     "nama": "Stok Minyak Goreng 1L",
-    "nilai": 7,
+    "jumlah": 7,
     "satuan": "botol",
     "ambang_waspada": 10,
-    "ambang_bahaya": 5,
+    "ambang_darurat": 5,
     "kategori": "stok",
     "keterangan": "Perlu restock",
     "last_update": "2026-04-23 10:00:00"
@@ -24,9 +24,9 @@
   {
     "id": 3,
     "nama": "Stok Beras 5kg",
-    "nilai": 12,
+    "jumlah": 12,
     "satuan": "karung",
-    "ambang_waspada": 8,
+    "ambang_darurat": 8,
     "ambang_bahaya": 4,
     "kategori": "stok",
     "keterangan": "Stok aman",
@@ -34,8 +34,8 @@
   },
   {
     "id": 4,
-    "nama": "Status Kasir",
-    "nilai": "ONLINE",
+    "nama": "Kasir",
+    "status": "ONLINE",
     "satuan": "-",
     "kategori": "operasional",
     "keterangan": "Kasir aktif",
@@ -43,8 +43,8 @@
   },
   {
     "id": 5,
-    "nama": "Status Toko",
-    "nilai": "BUKA",
+    "nama": "Toko",
+    "status": "BUKA",
     "satuan": "-",
     "kategori": "operasional",
     "keterangan": "Toko sedang beroperasi",
