@@ -26,8 +26,8 @@
     "nama": "Stok Beras 5kg",
     "jumlah": 12,
     "satuan": "karung",
-    "ambang_darurat": 8,
-    "ambang_bahaya": 4,
+    "ambang_waspada": 8,
+    "ambang_darurat": 4,
     "kategori": "stok",
     "keterangan": "Stok aman",
     "last_update": "2026-04-23 10:00:00"
