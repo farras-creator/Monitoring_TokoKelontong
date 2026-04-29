@@ -4,6 +4,9 @@ let currentFilter = "all";
 const container = document.getElementById("container");
 const errorBox = document.getElementById("errorBox");
 const summary = document.getElementById("summary");
+const cashierPhoto = document.getElementById("cashierPhoto");
+const cashierName = document.getElementById("cashierName");
+const cashierStatus = document.getElementById("cashierStatus");
 
 // ================= AUTO LOAD =================
 document.addEventListener("DOMContentLoaded", loadSensorData);
@@ -18,8 +21,10 @@ async function loadSensorData() {
 
     dataGlobal = await res.json();
 
-    filterData("all"); // langsung tampil semua
+   renderCashier(dataGlobal);
+    filterData("all");
   } catch (err) {
+    errorBox.classList.remove("hidden");
     errorBox.innerText = err.message;
   }
 }
@@ -38,6 +43,26 @@ function getStatus(item) {
     if (item.jumlah <= item.ambang_waspada) return ["WASPADA", "bg-yellow-400"];
     return ["AMAN", "bg-green-400"];
   }
+}
+
+// TAMPILKAN KASIR BERTUGAS
+function renderCashier(data) {
+  const cashierItem = data.find(
+    item => item.kategori === "operasional" && item.nama === "Kasir"
+  );
+
+  if (!cashierItem) {
+    cashierName.textContent = "-";
+    cashierStatus.textContent = "Data kasir tidak tersedia";
+    cashierPhoto.src = "images/kasir-placeholder.jpg";
+    return;
+  }
+
+  cashierName.textContent = cashierItem.nama_kasir || "-";
+  cashierStatus.textContent = cashierItem.status ? `Status: ${cashierItem.status}` : "-";
+
+  cashierPhoto.src = cashierItem.foto_kasir || "images/kasir-placeholder.jpg";
+  cashierPhoto.alt = cashierItem.nama_kasir || "Foto kasir";
 }
 
 // ================= FILTER =================

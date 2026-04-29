@@ -1,6 +1,6 @@
 [
   {
-    "id": 5,
+    "id": 1,
     "nama": "Toko",
     "status": "BUKA",
     "satuan": "-",
@@ -9,16 +9,18 @@
     "last_update": "2026-04-23 10:00:00"
   },
    {
-    "id": 4,
+    "id": 2,
     "nama": "Kasir",
     "status": "ONLINE",
     "satuan": "-",
     "kategori": "operasional",
     "keterangan": "Kasir aktif",
+    "nama_kasir": "Siti Aisyah",
+    "foto_kasir": "images/Honjouji Rika.jpeg",
     "last_update": "2026-04-23 10:00:00"
   },
   {
-    "id": 1,
+    "id": 3,
     "nama": "Stok Telur Ayam",
     "jumlah": 3,
     "satuan": "dus",
@@ -29,7 +31,7 @@
     "last_update": "2026-04-23 10:00:00"
   },
   {
-    "id": 2,
+    "id": 4,
     "nama": "Stok Minyak Goreng 1L",
     "jumlah": 7,
     "satuan": "botol",
@@ -40,7 +42,7 @@
     "last_update": "2026-04-23 10:00:00"
   },
   {
-    "id": 3,
+    "id": 5,
     "nama": "Stok Beras 5kg",
     "jumlah": 12,
     "satuan": "karung",
