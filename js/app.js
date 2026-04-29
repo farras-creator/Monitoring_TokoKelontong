@@ -13,7 +13,7 @@ async function loadSensorData() {
   try {
     errorBox.innerText = "";
 
-    const res = await fetch("data/operasional&stok.json");
+    const res = await fetch("data/status.json");
     if (!res.ok) throw new Error("JSON tidak ditemukan");
 
     dataGlobal = await res.json();
@@ -26,17 +26,17 @@ async function loadSensorData() {
 
 // ================= STATUS =================
 function getStatus(item) {
+  if (item.kategori === "operasional") {
+    if ( item.status === "BUKA"||item.status === "ONLINE")
+      return ["AKTIF", "bg-green-400"];
+    else
+      return ["NONAKTIF", "bg-gray-400"];
+  }
+
   if (item.kategori === "stok") {
     if (item.jumlah <= item.ambang_darurat) return ["DARURAT", "bg-red-500 text-white"];
     if (item.jumlah <= item.ambang_waspada) return ["WASPADA", "bg-yellow-400"];
     return ["AMAN", "bg-green-400"];
-  }
-
-  if (item.kategori === "operasional") {
-    if (item.status === "ONLINE" || item.status === "BUKA")
-      return ["AKTIF", "bg-green-400"];
-    else
-      return ["NONAKTIF", "bg-gray-400"];
   }
 }
 

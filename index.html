@@ -1,41 +1,47 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Dashboard Monitoring Toko</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Monitoring Toko Kelontong</title>
+
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <style>
-    .card:hover {
-      transform: translateY(-5px);
-      transition: 0.3s;
-    }
-  </style>
-
+  <link rel="stylesheet" href="css/style.css" />
   <script src="js/app.js" defer></script>
 </head>
 
-<body class="bg-gray-100 p-6">
+<body class="bg-gray-100 text-gray-800 min-h-screen">
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
 
-  <h1 class="text-3xl font-bold text-emerald-600 mb-6">
-    🏪 Dashboard Toko Kelontong
-  </h1>
+    <section class="bg-white rounded-2xl shadow p-4 sm:p-6 lg:p-7 mb-5 sm:mb-6">
+      <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-emerald-600 leading-tight">
+        🏪 Dashboard Toko Kelontong
+      </h1>
+    </section>
 
-  <!-- FILTER -->
-  <div class="flex gap-3 mb-6">
-    <button onclick="filterData('all')" class="bg-gray-200 px-4 py-2 rounded">Semua</button>
-    <button onclick="filterData('stok')" class="bg-gray-200 px-4 py-2 rounded">Stok</button>
-    <button onclick="filterData('operasional')" class="bg-gray-200 px-4 py-2 rounded">Operasional</button>
-  </div>
+    <section class="mb-5 sm:mb-6">
+      <div class="grid grid-cols-3 sm:flex sm:flex-wrap gap-2 sm:gap-3">
+        <button onclick="filterData('all')" class="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 px-3 sm:px-4 py-2 rounded-xl text-sm sm:text-base font-medium transition">
+          Semua
+        </button>
+        <button onclick="filterData('operasional')" class="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 px-3 sm:px-4 py-2 rounded-xl text-sm sm:text-base font-medium transition">
+          Operasional
+        </button>
+        <button onclick="filterData('stok')" class="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 px-3 sm:px-4 py-2 rounded-xl text-sm sm:text-base font-medium transition">
+          Stok
+        </button>
+        
+      </div>
+    </section>
 
-  <!-- SUMMARY -->
-  <div id="summary" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
+    <section id="summary" class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5 sm:mb-6"></section>
 
-  <!-- ERROR -->
-  <div id="errorBox" class="text-red-600 mb-4"></div>
+    <section id="errorBox" class="hidden mb-5 sm:mb-6 p-4 rounded-xl bg-red-100 text-red-700 border border-red-200 text-sm sm:text-base"></section>
 
-  <!-- DATA -->
-  <div id="container" class="grid md:grid-cols-3 gap-4"></div>
+    <section>
+      <div id="container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5"></div>
+    </section>
 
+  </main>
 </body>
 </html>

@@ -1,5 +1,23 @@
 [
   {
+    "id": 5,
+    "nama": "Toko",
+    "status": "BUKA",
+    "satuan": "-",
+    "kategori": "operasional",
+    "keterangan": "Toko sedang beroperasi",
+    "last_update": "2026-04-23 10:00:00"
+  },
+   {
+    "id": 4,
+    "nama": "Kasir",
+    "status": "ONLINE",
+    "satuan": "-",
+    "kategori": "operasional",
+    "keterangan": "Kasir aktif",
+    "last_update": "2026-04-23 10:00:00"
+  },
+  {
     "id": 1,
     "nama": "Stok Telur Ayam",
     "jumlah": 3,
@@ -30,24 +48,6 @@
     "ambang_darurat": 4,
     "kategori": "stok",
     "keterangan": "Stok aman",
-    "last_update": "2026-04-23 10:00:00"
-  },
-  {
-    "id": 4,
-    "nama": "Kasir",
-    "status": "ONLINE",
-    "satuan": "-",
-    "kategori": "operasional",
-    "keterangan": "Kasir aktif",
-    "last_update": "2026-04-23 10:00:00"
-  },
-  {
-    "id": 5,
-    "nama": "Toko",
-    "status": "BUKA",
-    "satuan": "-",
-    "kategori": "operasional",
-    "keterangan": "Toko sedang beroperasi",
     "last_update": "2026-04-23 10:00:00"
   }
 ]
